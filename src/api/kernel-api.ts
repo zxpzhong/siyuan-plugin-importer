@@ -204,6 +204,19 @@ class KernelApi extends BaseApi {
     }
     return await this.siyuanRequest("/api/import/importStdMd", params)
   }
+
+  /**
+   * 解压 zip 到工作空间路径
+   *
+   * @param zipPath - zip 路径（工作空间内）
+   * @param path - 解压目标路径（工作空间内）
+   */
+  public async unzip(zipPath: string, path: string): Promise<SiyuanData> {
+    return await this.siyuanRequest("/api/archive/unzip", {
+      zipPath,
+      path,
+    })
+  }
 }
 
 export default KernelApi

@@ -57,5 +57,15 @@
   "testOutputPlaceholder": "这里是测试的输出结果",
   "testInput": "测试输入",
   "testOutput": "测试输出",
-  "customFnHandlerError": "自定义处理函数处理失败，请检查。您也可以暂时禁用自定义处理函数完成导入"
+  "customFnHandlerError": "自定义处理函数处理失败，请检查。您也可以暂时禁用自定义处理函数完成导入",
+  "importGithub": "GitHub 仓库导入",
+  "importGithubTip": "支持直接粘贴 GitHub 仓库链接，例如 https://github.com/datawhalechina/so-large-lm/",
+  "githubUrlPlaceholder": "请输入 GitHub 仓库链接",
+  "importWorkspaceZip": "工作区 ZIP 导入",
+  "importWorkspaceZipTip": "支持 notion/wolai 导出的 workspace .zip 文件",
+  "msgExtractingZip": "正在解压并导入",
+  "msgZipExtractError": "ZIP 解压失败，错误信息如下",
+  "msgGithubUrlInvalid": "GitHub 仓库链接无效，请检查后重试",
+  "msgGithubFetchFailed": "GitHub 仓库下载失败，错误信息如下",
+  "msgDownloadingRepo": "正在下载 GitHub 仓库，请稍后"
 }

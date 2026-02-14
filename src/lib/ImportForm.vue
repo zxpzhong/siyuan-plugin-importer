@@ -31,7 +31,7 @@ interface Props {
 }
 
 // =============== 组件引入 ===============
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { loadImporterConfig, saveImporterConfig } from "../store/config"
 import { showMessage, confirm } from "siyuan"
 import { ImportService} from "../service/importService"
@@ -48,10 +48,12 @@ const toNotebookName = ref('')
 const tempCount = ref(0)
 const showSingleImportTip = ref(false)
 const showMultiImportTip = ref(false)
+const githubUrl = ref('')
 
 // 常量
 const hiddenNotebook = new Set(["思源笔记用户指南", "SiYuan User Guide"])
 const allowedMultiExtensions = ["docx", "epub", "opml", "md"]
+const canImportFromGithub = computed(() => githubUrl.value.trim().length > 0)
 
 // =============== 方法 ===============
 const notebookChange = async () => {
@@ -172,6 +174,40 @@ const selectFolder = async () => {
     await ImportService.multiImport(props.pluginInstance, toNotebookId.value)
 }
 
+const selectZipFile = async (event: Event) => {
+    if (tempCount.value > 0) {
+        showMessage(`${props.pluginInstance.i18n.tempCountExists}`, 1000, "error")
+        return
+    }
+
+    const files = (event.target as HTMLInputElement).files ?? []
+    if (files.length === 0) {
+        showMessage(`${props.pluginInstance.i18n.msgFileNotEmpty}`, 7000, "error")
+        return
+    }
+
+    const file = files[0]
+    showMessage(`${props.pluginInstance.i18n.msgExtractingZip} ${file.name}...`, 1500, "info")
+    props.dialog.destroy()
+    await ImportService.importWorkspaceZip(props.pluginInstance, file, toNotebookId.value)
+}
+
+const importFromGithub = async () => {
+    if (!canImportFromGithub.value) {
+        showMessage(`${props.pluginInstance.i18n.msgGithubUrlInvalid}`, 7000, "error")
+        return
+    }
+
+    if (tempCount.value > 0) {
+        showMessage(`${props.pluginInstance.i18n.tempCountExists}`, 1000, "error")
+        return
+    }
+
+    showMessage(`${props.pluginInstance.i18n.msgDownloadingRepo}`, 2000, "info")
+    props.dialog.destroy()
+    await ImportService.importFromGithub(props.pluginInstance, githubUrl.value, toNotebookId.value)
+}
+
 const toggleSingleHighlight = () => {
     showSingleImportTip.value = !showSingleImportTip.value
 }
@@ -279,6 +315,39 @@ onMounted(async () => {
 
             <div class="fn__flex b3-label config__item">
                 <div class="fn__flex-1 fn__flex-center">
+                    {{ pluginInstance.i18n.importGithub }}
+                    <div class="b3-label__text">
+                        {{ pluginInstance.i18n.importGithubTip }}
+                    </div>
+                </div>
+                <span class="fn__space" />
+                <div class="fn__flex-center fn__size200 github-import">
+                    <input v-model="githubUrl" class="b3-text-field" :placeholder="pluginInstance.i18n.githubUrlPlaceholder" />
+                    <button class="b3-button b3-button--outline" :disabled="!canImportFromGithub" @click="importFromGithub">
+                        {{ pluginInstance.i18n.startImport }}
+                    </button>
+                </div>
+            </div>
+
+            <div class="fn__flex b3-label config__item">
+                <div class="fn__flex-1 fn__flex-center">
+                    {{ pluginInstance.i18n.importWorkspaceZip }}
+                    <div class="b3-label__text">
+                        {{ pluginInstance.i18n.importWorkspaceZipTip }}
+                    </div>
+                </div>
+                <span class="fn__space" />
+                <button class="b3-button b3-button--outline fn__flex-center fn__size200" style="position: relative">
+                    <input class="b3-form__upload" type="file" accept=".zip" @change="selectZipFile" />
+                    <svg>
+                        <use xlink:href="#iconDownload" />
+                    </svg>
+                    {{ pluginInstance.i18n.startImport }}
+                </button>
+            </div>
+
+            <div class="fn__flex b3-label config__item">
+                <div class="fn__flex-1 fn__flex-center">
                     {{ pluginInstance.i18n.cleanTemp }}
                     <div class="b3-label__text">
                         {{ pluginInstance.i18n.tempTotal }} <span class="selected"> [ {{ tempCount }} ] </span>
@@ -332,4 +401,10 @@ onMounted(async () => {
   .highlight.hidden,
   .sign.hidden
     display none
+
+  .github-import
+    gap 8px
+
+    .b3-text-field
+      width 100%
 </style>
