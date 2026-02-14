@@ -48,5 +48,15 @@
   "importConfigSaveSuccess": "Configuration saved successfully",
   "testOutputPlaceholder": "Here is the output of the test",
   "testInput": "Test input",
-  "testOutput": "Test output"
+  "testOutput": "Test output",
+  "importGithub": "Import from GitHub",
+  "importGithubTip": "Paste a GitHub repository URL directly, for example: https://github.com/datawhalechina/so-large-lm/",
+  "githubUrlPlaceholder": "Enter GitHub repository URL",
+  "importWorkspaceZip": "Import workspace ZIP",
+  "importWorkspaceZipTip": "Supports workspace .zip exported from Notion/Wolai",
+  "msgExtractingZip": "Extracting and importing",
+  "msgZipExtractError": "ZIP extraction failed, details",
+  "msgGithubUrlInvalid": "Invalid GitHub repository URL, please check and retry",
+  "msgGithubFetchFailed": "Failed to download GitHub repository, details",
+  "msgDownloadingRepo": "Downloading GitHub repository, please wait"
 }

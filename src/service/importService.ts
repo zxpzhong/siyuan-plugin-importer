@@ -23,8 +23,8 @@
  * questions.
  */
 
-import { mediaDir, workspaceDir } from "../Constants"
-import { getBackend, getFrontend, showMessage } from "siyuan"
+import { workspaceDir } from "../Constants"
+import { showMessage } from "siyuan"
 import ImporterPlugin from "../index"
 import {
   copyDir,
@@ -35,10 +35,11 @@ import {
   removeLinks,
   replaceImagePath,
 } from "../utils/utils"
-import shortHash from "shorthash2"
 import { loadImporterConfig } from "../store/config"
 
 export class ImportService {
+  private static readonly tempImportRoot = "/temp/convert/pandoc"
+
   /**
    * 上传并转换，md、html 不上传
    *
@@ -188,6 +189,88 @@ export class ImportService {
     await pluginInstance.kernelApi.openNotebook(toNotebookId)
 
     showMessage(pluginInstance.i18n.msgImportSuccess, 5000, "info")
+  }
+
+  public static async importWorkspaceZip(
+    pluginInstance: ImporterPlugin,
+    file: File,
+    toNotebookId: string,
+    targetDirName?: string
+  ) {
+    const dirName = targetDirName || this.normalizeDirName(file.name.replace(/\.zip$/i, ""))
+    const zipPath = `${this.tempImportRoot}/${dirName}.zip`
+    const unzipPath = `${this.tempImportRoot}/${dirName}`
+
+    await pluginInstance.kernelApi.putFile(zipPath, file)
+    const unzipResult = await pluginInstance.kernelApi.unzip(zipPath, unzipPath)
+    if (unzipResult.code !== 0) {
+      showMessage(`${pluginInstance.i18n.msgZipExtractError}：${unzipResult.msg}`, 7000, "error")
+      return
+    }
+
+    const localPath = `${workspaceDir}${unzipPath}`
+    const mdResult = await pluginInstance.kernelApi.importStdMd(localPath, toNotebookId, `/`)
+    if (mdResult.code !== 0) {
+      showMessage(`${pluginInstance.i18n.msgDocCreateFailed}=>${localPath}`, 7000, "error")
+      return
+    }
+
+    await pluginInstance.kernelApi.openNotebook(toNotebookId)
+    showMessage(pluginInstance.i18n.msgImportSuccess, 5000, "info")
+  }
+
+  public static async importFromGithub(pluginInstance: ImporterPlugin, repoUrl: string, toNotebookId: string) {
+    const repoInfo = this.parseGithubRepoUrl(repoUrl)
+    if (!repoInfo) {
+      showMessage(pluginInstance.i18n.msgGithubUrlInvalid, 7000, "error")
+      return
+    }
+
+    const { owner, repo } = repoInfo
+    const repoApiUrl = `https://api.github.com/repos/${owner}/${repo}`
+    const repoRes = await fetch(repoApiUrl)
+    if (!repoRes.ok) {
+      showMessage(`${pluginInstance.i18n.msgGithubFetchFailed}：${repoRes.status} ${repoRes.statusText}`, 7000, "error")
+      return
+    }
+
+    const repoJson = await repoRes.json()
+    const defaultBranch = repoJson.default_branch
+    const zipUrl = `https://codeload.github.com/${owner}/${repo}/zip/refs/heads/${defaultBranch}`
+    const zipRes = await fetch(zipUrl)
+    if (!zipRes.ok) {
+      showMessage(`${pluginInstance.i18n.msgGithubFetchFailed}：${zipRes.status} ${zipRes.statusText}`, 7000, "error")
+      return
+    }
+
+    const zipBlob = await zipRes.blob()
+    const zipFile = new File([zipBlob], `${repo}-${defaultBranch}.zip`, { type: "application/zip" })
+    await this.importWorkspaceZip(pluginInstance, zipFile, toNotebookId, `${owner}-${repo}-${defaultBranch}`)
+  }
+
+  private static parseGithubRepoUrl(repoUrl: string) {
+    try {
+      const url = new URL(repoUrl.trim())
+      if (url.hostname !== "github.com") {
+        return null
+      }
+
+      const segments = url.pathname.split("/").filter(Boolean)
+      if (segments.length < 2) {
+        return null
+      }
+
+      return {
+        owner: segments[0],
+        repo: segments[1].replace(/\.git$/, ""),
+      }
+    } catch {
+      return null
+    }
+  }
+
+  private static normalizeDirName(name: string) {
+    return name.replace(/[^\w.-]/g, "-")
   }
 
   //////////////////////////////////////////////////////////////////
