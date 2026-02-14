@@ -18,11 +18,13 @@ Import md, epub, docx, html, etc. into Siyuan notes. Currently supported formats
 
 ## FAQ
 
-* Q1：How to install the import tool plug-in? Where can I find his entrance after installation?
+* Q1：How to install the import tool plug-in? Where can I find its entry after installation?
 
   A1：Find **`Marketplace->Plugins->Importer`** download and enable.
 
   After the installation is complete, find the `Importer` icon on the top right toolbar, and click to follow the pop-up window.
+
+  If the icon does not appear immediately after enabling the plugin, make sure Siyuan is `3.1.12` or above, and then restart Siyuan.
 
 * Q2: Can MOBI files be supported? Can Markdown folders be supported?
 
