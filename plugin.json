@@ -7,12 +7,18 @@
   "backends": [
     "windows",
     "linux",
-    "darwin"
+    "darwin",
+    "docker",
+    "ios",
+    "android",
+    "harmony"
   ],
   "frontends": [
     "desktop",
-    "desktop-window",
-    "browser-desktop"
+    "mobile",
+    "browser-desktop",
+    "browser-mobile",
+    "desktop-window"
   ],
   "displayName": {
     "default": "Importer",
