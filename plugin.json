@@ -11,6 +11,7 @@
   ],
   "frontends": [
     "desktop",
+    "desktop-window",
     "browser-desktop"
   ],
   "displayName": {
