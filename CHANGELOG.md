@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.4](https://github.com/zxpzhong/siyuan-plugin-importer/compare/v2.0.3...v2.0.4) (2026-02-14)
+
+
+### Bug Fixes
+
+* make topbar importer icon visible across themes ([b32e6df](https://github.com/zxpzhong/siyuan-plugin-importer/commit/b32e6dff9f4561078278253fbd83a0f8eb7e34e1))
+
 ## [1.9.0](https://github.com/zxpzhong/siyuan-plugin-importer/compare/v1.8.1...v1.9.0) (2026-02-14)
 
 
