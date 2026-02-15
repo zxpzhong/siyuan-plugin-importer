@@ -87,9 +87,7 @@ export async function initTopbar(pluginInstance: ImporterPlugin) {
     icon: iconImporter.iconImporter,
     title: pluginInstance.i18n.importer,
     position: "right",
-    callback: (event) => {
-      event.preventDefault()
-      event.stopPropagation()
+    callback: () => {
       openImportDialog()
     },
   })
