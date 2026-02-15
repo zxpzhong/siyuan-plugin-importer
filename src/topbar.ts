@@ -66,16 +66,7 @@ const createVueComponentInDialog = (
  * @since 1.0.0
  */
 export async function initTopbar(pluginInstance: ImporterPlugin) {
-  const topBarElement = pluginInstance.addTopBar({
-    icon: iconImporter.iconImporter,
-    title: pluginInstance.i18n.importer,
-    position: "right",
-    callback: () => {
-      pluginInstance.logger.info(`${pluginInstance.i18n.importer} added toolbar`)
-    },
-  })
-
-  topBarElement.addEventListener("click", async () => {
+  const openImportDialog = () => {
     const frontEnd = getFrontend()
     const isMobile = frontEnd === "mobile" || frontEnd === "browser-mobile"
     const importFormId = "siyuan-import-form"
@@ -88,16 +79,44 @@ export async function initTopbar(pluginInstance: ImporterPlugin) {
     try {
       createVueComponentInDialog(ImportForm, pluginInstance, d, importFormId)
     } catch (error) {
-      pluginInstance.logger.error('Error creating ImportForm component:', error)
+      pluginInstance.logger.error("Error creating ImportForm component:", error)
     }
+  }
+
+  const topBarElement = pluginInstance.addTopBar({
+    icon: iconImporter.iconImporter,
+    title: pluginInstance.i18n.importer,
+    position: "right",
+    callback: () => {
+      openImportDialog()
+    },
   })
+
+  // Fallback command: when top bar icon is hidden in the overflow menu or unavailable,
+  // users can still trigger importer from the command palette.
+  pluginInstance.addCommand({
+    langKey: "importer",
+    langText: pluginInstance.i18n.importer,
+    hotkey: "",
+    callback: openImportDialog,
+  })
+
+  if (!topBarElement) {
+    pluginInstance.logger.warn("Top bar element is unavailable, please use command palette to open importer")
+    return
+  }
 
   // 添加右键菜单
   topBarElement.addEventListener("contextmenu", () => {
     let rect = topBarElement.getBoundingClientRect()
     // 如果获取不到宽度，则使用更多按钮的宽度
     if (rect.width === 0) {
-      rect = document.querySelector("#barMore").getBoundingClientRect()
+      const barMore = document.querySelector("#barMore")
+      if (!barMore) {
+        pluginInstance.logger.warn("#barMore not found, skip opening context menu")
+        return
+      }
+      rect = barMore.getBoundingClientRect()
     }
     initContextMenu(pluginInstance, rect)
   })
